@@ -2,11 +2,11 @@
 
 Học kỳ 3, Năm học: 2025-2026
 
-**Họ tên**: ...
+**Họ tên**: Trần Thế Nghĩa
 
-**MSSV**: ...
+**MSSV**: DC25V7K020
 
-**Lớp HP**: ...
+**Lớp HP**: Công nghệ Web - CT275
 
 
 

@@ -1,6 +1,45 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
+use CT275\Labs\Contact;
+
+$errors = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $contact = new Contact($PDO);
+
+  $avatarPath = null;
+  if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = __DIR__ . '/uploads/';
+    if (!is_dir($uploadDir)) {
+      mkdir($uploadDir, 0755, true);
+    }
+
+    $fileName = time() . '_' . basename($_FILES['avatar']['name']);
+    $targetFilePath = $uploadDir . $fileName;
+
+    if (move_uploaded_file($_FILES['avatar']['tmp_name'], $targetFilePath)) {
+      $avatarPath = '/uploads/' . $fileName;
+    }
+  }
+
+  $contactData = [
+    'name' => $_POST['name'] ?? '',
+    'phone' => $_POST['phone'] ?? '',
+    'notes' => $_POST['notes'] ?? '',
+    'avatar' => $avatarPath
+  ];
+
+  $errors = $contact->validate($contactData);
+
+  if (empty($errors)) {
+    $contact->fill($contactData);
+    if ($contact->save()) {
+      redirect('/');
+    }
+  }
+}
+
 include_once __DIR__ . '/../src/partials/header.php';
 ?>
 
@@ -18,7 +57,7 @@ include_once __DIR__ . '/../src/partials/header.php';
     <div class="row">
       <div class="col-12">
 
-        <form method="post" class="col-md-6 offset-md-3">
+        <form method="post" enctype="multipart/form-data" class="col-md-6 offset-md-3">
 
           <!-- Name -->
           <div class="mb-3">
@@ -54,6 +93,12 @@ include_once __DIR__ . '/../src/partials/header.php';
                 <strong><?= $errors['notes'] ?></strong>
               </span>
             <?php endif ?>
+          </div>
+
+          <!-- Avatar -->
+          <div class="mb-3">
+            <label for="avatar" class="form-label">Avatar</label>
+            <input type="file" name="avatar" class="form-control" id="avatar" accept="image/*">
           </div>
 
           <!-- Submit -->
